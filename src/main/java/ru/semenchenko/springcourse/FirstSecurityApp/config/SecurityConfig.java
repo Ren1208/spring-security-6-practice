@@ -1,19 +1,20 @@
 package ru.semenchenko.springcourse.FirstSecurityApp.config;
 
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.crypto.password.NoOpPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import ru.semenchenko.springcourse.FirstSecurityApp.services.PersonDetailsService;
 
-import static org.springframework.security.config.Customizer.withDefaults;
-
 /**
  * @author Artyom Semenchenko
  */
 
+@Configuration
 @EnableWebSecurity
 public class SecurityConfig {
 
@@ -26,19 +27,24 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
+                .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
-                        .anyRequest()
-                        .authenticated()
+                        .requestMatchers("/auth/login", "/error").permitAll()
+                        .anyRequest().authenticated()
                 )
-                .formLogin(withDefaults());
-
-        http.userDetailsService(personDetailsService);
+                .formLogin(form -> form
+                        .loginPage("/auth/login")
+                        .loginProcessingUrl("/process_login")
+                        .defaultSuccessUrl("/hello", true)
+                        .failureUrl("/auth/login?error")
+                )
+                .userDetailsService(personDetailsService);
 
         return http.build();
     }
 
     @Bean
-    public PasswordEncoder getPasswordEncoder() {
+    public PasswordEncoder passwordEncoder() {
         return NoOpPasswordEncoder.getInstance();
     }
 }
