@@ -38,6 +38,9 @@ public class SecurityConfig {
                         .defaultSuccessUrl("/hello", true)
                         .failureUrl("/auth/login?error")
                 )
+                .logout(logout -> logout
+                        .logoutUrl("/logout")
+                        .logoutSuccessUrl("/auth/login"))
                 .userDetailsService(personDetailsService);
 
         return http.build();
