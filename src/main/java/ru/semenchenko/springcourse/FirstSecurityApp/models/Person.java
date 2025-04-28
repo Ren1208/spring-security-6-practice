@@ -31,7 +31,6 @@ public class Person {
 
     @Column(name = "password")
     @NotEmpty(message = "Пароль не может быть пустым")
-    @Size(min = 6, max = 25, message = "Длина пароля должна быть от 6 до 25 символов")
     private String password;
 
     public Person() {
