@@ -4,12 +4,9 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.NoOpPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
-import ru.semenchenko.springcourse.FirstSecurityApp.services.PersonDetailsService;
 
 /**
  * @author Artyom Semenchenko
@@ -19,18 +16,13 @@ import ru.semenchenko.springcourse.FirstSecurityApp.services.PersonDetailsServic
 @EnableWebSecurity
 public class SecurityConfig {
 
-    private final PersonDetailsService personDetailsService;
-
-    public SecurityConfig(PersonDetailsService personDetailsService) {
-        this.personDetailsService = personDetailsService;
-    }
-
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/auth/login", "/auth/registration", "/error").permitAll()
-                        .anyRequest().authenticated()
+                        .requestMatchers("/admin").hasRole("ADMIN")
+                        .anyRequest().hasAnyRole("USER", "ADMIN")
                 )
                 .formLogin(form -> form
                         .loginPage("/auth/login")
@@ -40,8 +32,8 @@ public class SecurityConfig {
                 )
                 .logout(logout -> logout
                         .logoutUrl("/logout")
-                        .logoutSuccessUrl("/auth/login"))
-                .userDetailsService(personDetailsService);
+                        .logoutSuccessUrl("/auth/login")
+                );
 
         return http.build();
     }
